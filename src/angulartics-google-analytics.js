@@ -115,7 +115,7 @@ angular.module('angulartics.google.analytics', ['angulartics'])
     }
     
     // E-Commerce tracking
-    if (eventType === "ecommerce") {
+    if (eventType === "ecommerce" && settings.enableECommerce) {
 
       switch (eventAction) {
         case "addItem" : addItem(eventTracker, properties.id, properties.name, properties.sku, properties.category, properties.price, properties.quantity, properties.currency);
