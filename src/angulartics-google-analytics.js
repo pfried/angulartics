@@ -4,6 +4,7 @@
  * Universal Analytics update contributed by http://github.com/willmcclellan
  * ECommerce update contributed by http://github.com/pfried
  * License: MIT
+ * 
  */
 (function(angular) {
 'use strict';
@@ -32,7 +33,7 @@ angular.module('angulartics.google.analytics', ['angulartics'])
       
       trackers.push(tracker);
       
-      if (settings.enableECommerce) {
+      if (settings.enableECommerce && window.ga) {
           ga(tracker + '.require', 'ecommerce', 'ecommerce.js');
       }
   }
@@ -95,27 +96,31 @@ angular.module('angulartics.google.analytics', ['angulartics'])
 
   $analyticsProvider.registerEventTrack(function (action, properties) {
     
-    var eventArgs = action.split(settings.delimitor), eventType, eventAction, eventTracker;
+    var eventArgs = action ? action.split(settings.delimitor) : action;
+    
+    var eventType, eventAction, eventTracker;
 
-    switch (eventArgs.length) {
-        case 1 : eventAction = eventArgs[0];
-        break;
-        case 2 : eventType = eventArgs[0]; eventAction = eventArgs[1];
-        break;
-        case 3 : eventTracker = eventArgs[0]; eventType = eventArgs[1]; eventAction = eventArgs[2];
-        break;
-        default : eventAction = eventArgs[0];
-        break;
+    if (eventArgs) {
+        switch (eventArgs.length) {
+            case 1 : eventAction = eventArgs[0];
+            break;
+            case 2 : eventType = eventArgs[0]; eventAction = eventArgs[1];
+            break;
+            case 3 : eventTracker = eventArgs[0]; eventType = eventArgs[1]; eventAction = eventArgs[2];
+            break;
+            default : eventAction = eventArgs[0];
+            break;
+        }        
     }
     
     // Legacy events
-    if (eventArgs.length === 1) {
+    if (!eventArgs || eventArgs.length === 1) {
         if (window._gaq) _gaq.push(['_trackEvent', properties.category, eventAction, properties.label, properties.value]);
         if (window.ga) ga('send', 'event', properties.category, eventAction, properties.label, properties.value);
     }
     
     // E-Commerce tracking
-    if (eventType === "ecommerce" && settings.enableECommerce) {
+    if (eventType === "ecommerce" && settings.enableECommerce && window.ga) {
 
       switch (eventAction) {
         case "addItem" : addItem(eventTracker, properties.id, properties.name, properties.sku, properties.category, properties.price, properties.quantity, properties.currency);
